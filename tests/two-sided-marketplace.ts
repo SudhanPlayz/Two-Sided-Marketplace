@@ -82,17 +82,14 @@ describe("two-sided-marketplace", () => {
   });
 
   it("Purchases a service", async () => {
-    mint = await createMint(provider.connection, buyerKeypair, buyerKeypair.publicKey, null, 6);
-    console.log("Minted Token");
-    buyerTokenAccount = await createAccount(provider.connection, buyerKeypair, mint, buyerKeypair.publicKey);
-    console.log("Created Account for Buyer");
-    vendorTokenAccount = await createAccount(provider.connection, vendorKeypair, mint, vendorKeypair.publicKey);
-    console.log("Created Account for Vendor");
-    marketplaceTokenAccount = await createAccount(provider.connection, marketplaceKeypair, mint, marketplaceKeypair.publicKey);
-    console.log("Created Account for Marketplace");
+    mint = await createMint(provider.connection, payer, payer.publicKey, null, 6);
 
-    await mintTo(provider.connection, payer, mint, buyerTokenAccount, payer, 2000, [payer]);
-    console.log("Minted To Buyer");
+    buyerTokenAccount = await createAccount(provider.connection, payer, mint, buyerKeypair.publicKey);
+    vendorTokenAccount = await createAccount(provider.connection, payer, mint, vendorKeypair.publicKey);
+    marketplaceTokenAccount = await createAccount(provider.connection, payer, mint, marketplaceKeypair.publicKey);
+
+    await mintTo(provider.connection, payer, mint, buyerTokenAccount, payer, 2000);
+    
     const serviceKeypair = Keypair.generate();
     const serviceName = "Test Service";
     const serviceDescription = "This is a test service";
@@ -108,7 +105,6 @@ describe("two-sided-marketplace", () => {
       })
       .signers([serviceKeypair, vendorKeypair])
       .rpc();
-    console.log("Created Service");
 
     await program.methods
       .purchaseService()
@@ -126,7 +122,6 @@ describe("two-sided-marketplace", () => {
       })
       .signers([buyerKeypair])
       .rpc();
-    console.log("Purchased Service");
 
     const buyerBalance = await provider.connection.getTokenAccountBalance(buyerTokenAccount);
     const vendorBalance = await provider.connection.getTokenAccountBalance(vendorTokenAccount);
